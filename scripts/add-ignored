@@ -1,0 +1,4 @@
+#!/bin/sh
+git ls-files --other --exclude-standard | egrep -v '\.(c|scala)$' | tee -a .gitignore
+git commit -m "more binary files ignored" .gitignore
+
