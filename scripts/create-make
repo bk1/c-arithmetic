@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+use strict;
+use File::Find();
+
+my $with_test = 0;
+
+if ($#ARGV >= 0 && $ARGV[0] eq '-t') {
+    $with_test = 1;
+}
+
+# Set the variable $File::Find::dont_use_nlink if you're using AFS,
+# since AFS cheats.
+
+# for the convenience of &wanted calls, including -eval statements:
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
+my $all = "all:";
+
+my $clean = "clean:\n\trm -f lib/libarithmetic.a ";
+
+my $targets = "";
+
+my $lib = "lib/libarithmetic.a:";
+my $libm = "\tar crs lib/libarithmetic.a";
+
+sub wanted;
+sub doexec ($@);
+
+
+use Cwd ();
+my $cwd = Cwd::cwd();
+
+
+# Traverse desired filesystems
+File::Find::find({wanted => \&wanted}, '.');
+
+print "# automatically generated makefile by $0\n\n";
+print "CFLAGS=-Wall -g -O2 -std=gnu99 -I./include -L./lib\n\n"; # -D_XOPEN_SOURCE -D__USE_XOPEN2K\n\n";
+print "LIBS=-larithmetic\n\n";
+print "\n$all\n";
+print "\n$clean\n";
+print "\n$targets\n";
+print "\n$lib\n";
+print "$libm\n";
+
+exit 0;
+
+
+sub wanted {
+    /^.*\.c\z/s &&
+    doexec(0);
+}
+
+
+sub doexec ($@) {
+    my $ok = shift;
+    if ($ok) {
+        my $old = select(STDOUT);
+        $| = 1;
+        print "name=$name\n";
+        select($old);
+        return 0 unless <STDIN> =~ /^y/;
+    }
+    chdir $cwd; #sigh
+    # system "ls -l $name";
+    my $sname = $name;
+    $sname =~ s/^\.\///;
+    my $tname = $sname;
+    if ($name =~ m/\/lib\//) {
+        $tname =~ s/lib[a-zA-Z0-9]*\.c$/libarithmetic.a/;
+        my $oname = $sname;
+        $oname =~ s/\.c$/.o/;
+        $targets .= "$oname: $sname\n\tgcc -c \$(CFLAGS) $sname -o $oname\n\n";
+        $lib .= " $oname";
+        $libm .= " $oname";
+        $clean .= " $oname";
+    } elsif ($name =~ m/\/test\//) {
+        if ($with_test) {
+            $tname =~ s/\.c$//;
+            $targets .= "$tname: $sname lib/libarithmetic.a include/arithmetic.h\n\tgcc \$(CFLAGS) $sname \$(LIBS) -L/usr/local/lib -o $tname\n\n";
+            $all .= " $tname";
+            $clean .= " $tname";
+        }
+    } else {
+        $tname =~ s/\.c$//;
+        $targets .= "$tname: $sname lib/libarithmetic.a include/arithmetic.h\n\tgcc \$(CFLAGS) $sname \$(LIBS) -o $tname\n\n";
+        $all .= " $tname";
+        $clean .= " $tname";
+    }
+    chdir $File::Find::dir;
+    return !$?;
+}
