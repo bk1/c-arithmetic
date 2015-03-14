@@ -23,7 +23,7 @@ void add_test() {
       //printf("yh=%llu\n", yh);
       for (uint64 xl = 0; xl <= 5; xl++) {
         uint64 x = xh + xl - 1;
-        printf("puts('xh=%llu xl=%llu x=%llu')\n", xh, xl, x);
+        // printf("puts('xh=%llu xl=%llu x=%llu')\n", xh, xl, x);
         for (uint64 yl = 0; yl <= 5; yl++) {
           uint64 y = yh + yl - 1;
           //printf("yh=%llu yl=%llu y=%llu\n", yh, yl, y);
@@ -92,6 +92,8 @@ int main(int argc, char **argv) {
   fprintf(stderr, "done with C-operations\n");
   printf("puts 'DONE'\n");
   fflush(stdout);
+  retcode = close(STDOUT_FILENO);
+  handle_error(retcode, "close");
   retcode = pclose(pipe);
   handle_error(retcode, "pclose");
   exit(0);
