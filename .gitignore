@@ -27,3 +27,10 @@
 *.i*86
 *.x86_64
 *.hex
+arithmetic.log
+include/arithmetic.h~
+scripts/create-make~
+test/investigate
+test/investigate.c~
+test/test-arithmetic
+test/test-arithmetic.c~
