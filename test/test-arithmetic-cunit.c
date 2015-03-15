@@ -197,6 +197,39 @@ void test_div_and_mul() {
 }
 
 
+/* 
+ */
+void test_combine_and_split() {
+  for (uint64 xh = 1; xh > 0; xh <<= 1) {
+    for (uint64 xl = 0; xl <= 5; xl++) {
+      uint64 x = xh + xl - 1;
+      for (uint64 yh = 1; yh > 0; yh <<= 1) {
+        for (uint64 yl = 0; yl <= 5; yl++) {
+          uint64 y = yh + yl - 1;
+          uint128 z = combine(x, y);
+          CU_ASSERT_EQUAL(x, upper(z));
+          CU_ASSERT_EQUAL(y, lower(z));
+        }
+      }
+    }
+  }
+}
+
+/* 
+ */
+void test_split_and_combine() {
+  for (uint128 xh = 1; xh > 0; xh <<= 1) {
+    for (uint128 xl = 0; xl <= 5; xl++) {
+      uint128 x = xh + xl - 1;
+      uint64 u = upper(x);
+      uint64 v = lower(x);
+      uint128 w = combine(u, v);
+      CU_ASSERT(w == x);
+      CU_ASSERT_EQUAL(w, x);
+    }
+  }
+}
+
 /* The main() function for setting up and running the tests.
  * Returns a CUE_SUCCESS on successful running, another
  * CUnit error code on failure.
@@ -224,6 +257,8 @@ int main() {
       || (NULL == CU_add_test(pSuite, "test of subtracting and then ading", test_sub_and_add))
       || (NULL == CU_add_test(pSuite, "test of multiplication and then division", test_mul_and_div))
       || (NULL == CU_add_test(pSuite, "test of division and then multiplication", test_div_and_mul))
+      || (NULL == CU_add_test(pSuite, "test of splitting and combining", test_split_and_combine))
+      || (NULL == CU_add_test(pSuite, "test of combining and splitting", test_combine_and_split))
       ) {
     CU_cleanup_registry();
     return CU_get_error();
