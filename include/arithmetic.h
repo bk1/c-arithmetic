@@ -44,9 +44,15 @@ unsigned_result_with_carry adc_sx(unsigned_result_with_carry rx, uint64 y);
 unsigned_result_with_carry adc_sy(uint64 x, unsigned_result_with_carry ry);
 unsigned_result_with_carry sbb(uint64 x, uint64 y, uint8 carry);
 unsigned_result_with_carry sub(uint64 x, uint64 y);
-uint64 lower(uint128 x);
-uint64 upper(uint128 x);
 uint128 mul(uint64 x, uint64 y);
 unsigned_divx_result divx(uint128 x, uint64 y);
+
+uint64 lower(uint128 x);
+uint64 upper(uint128 x);
+uint128 combine(uint64 upper, uint64 lower);
+
+void sprint_uint128_dec(char *buf,  uint128 x);
+void sprint_uint128_hex(char *buf,  uint128 x);
+void sprint_uint128_oct(char *buf,  uint128 x);
 
 #endif

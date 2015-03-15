@@ -59,6 +59,70 @@ void sub_test() {
   }
 }
 
+void mul_test() {
+  char bufx[128];
+  printf("def mtest(x,y,z)\n    zz=x*y;\n    msg=\"x=#{x} y=#{y} z=#{z} zz=#{zz}\"\n    puts(msg) if (z != zz);\nend\n\n");
+  for (uint64 xh = 1; xh > 0; xh <<= 1) {
+    for (uint64 yh = 1; yh > 0; yh <<= 1) {
+      for (uint64 xl = 0; xl <= 5; xl++) {
+        uint64 x = xh + xl - 1;
+        for (uint64 yl = 0; yl <= 5; yl++) {
+          uint64 y = yh + yl - 1;
+          uint128 z = mul(x, y);
+          sprint_uint128_hex(bufx, z);
+          printf("x=%llu; y=%llu; z=0x%s;\nmtest(x,y,z);\n", x, y, bufx);
+        }
+      }
+    }
+  }
+}
+
+void divx_test() {
+  char bufx[128];
+  char bufq[128];
+  printf("def dtest(x,y,q,r,o1,o2)\n    xx=q*y+r;\n    msg=\"x=#{x} y=#{y} q=#{q} r=#{r} xx=#{xx} o1=#{o1} o2=#{o2}\"\n    puts(msg + \" val\") if (x != xx);\n    puts(msg + \" overflow\") if (o1 != 0 || o2 != 0);\nend\n\n");
+  fflush(stdout);
+  for (uint128 xh = 1; xh > 0; xh <<= 1) {
+    for (uint64 yh = 1; yh > 0; yh <<= 1) {
+      for (uint128 xl = 0; xl <= 5; xl++) {
+        uint128 x = xh + xl - 1;
+        for (uint64 yl = 0; yl <= 5; yl++) {
+          uint64 y = yh + yl - 1;
+          if (y == 0) {
+            continue;
+          }
+          uint128 x1 = upper(x);
+          unsigned_divx_result z1 = divx(x1, y);
+          uint128 x2 = combine(z1.remainder, lower(x));
+          unsigned_divx_result z2 = divx(x2, y);
+          uint128 q = combine(z1.quotient, z2.quotient);
+          uint64  r = z2.remainder;
+          sprint_uint128_hex(bufx, x);
+          sprint_uint128_hex(bufq, q);
+          printf("x=0x%s; y=%llu; q=0x%s; r=%llu; o1=%d; o2=%d;\ndtest(x,y,q,r,o1,o2);\n", bufx, y, bufq, r, z1.overflow, z2.overflow);
+          fflush(stdout);
+        }
+      }
+    }
+  }
+}
+
+void sprintf_test() {
+  char bufd[128];
+  char bufx[128];
+  char bufo[128];
+  printf("def ptest(x,y,z, xs, ys, zs)\n    msg=\"x=#{x} (#{xs}) y=#{y} (#{ys}) z=#{z} (#{zs})\"\n    puts(msg+\" x!=y\") if (x != y);\n    puts(msg+ \" x!=z\") if (x != z)\nend\n\n");
+  for (uint128 xh = 1; xh > 0; xh <<= 1) {
+    for (uint128 xl = 0; xl <= 5; xl++) {
+      uint128 x = xh + xl - 1;
+      sprint_uint128_dec(bufd, x);
+      sprint_uint128_hex(bufx, x);
+      sprint_uint128_oct(bufo, x);
+      printf("x=%s; xs='%s'; y=0x%s; ys='%s'; z=0%s; zs='%s';\nptest(x,y,z, xs, ys, zs);\n", bufd, bufd, bufx, bufx, bufo, bufo);
+    }
+  }
+}
+
 void handle_error(long code, char *msg) {
   if (code < 0) {
     char extra_msg[ERROR_SIZE];
@@ -89,6 +153,12 @@ int main(int argc, char **argv) {
   add_test();
   fprintf(stderr, "doing sub_test\n");
   sub_test();
+  fprintf(stderr, "doing sprintf_test\n");
+  sprintf_test();
+  fprintf(stderr, "doing mul_test\n");
+  mul_test();
+  fprintf(stderr, "doing divx_test\n");
+  divx_test();
   fprintf(stderr, "done with C-operations\n");
   printf("puts 'DONE'\n");
   fflush(stdout);

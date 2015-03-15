@@ -81,7 +81,7 @@ sub doexec ($@) {
     } elsif ($name =~ m/\/test\//) {
         if ($with_test) {
             $tname =~ s/\.c$//;
-            $targets .= "$tname: $sname lib/libarithmetic.a include/arithmetic.h\n\tgcc \$(CFLAGS) $sname \$(LIBS) -L/usr/local/lib -o $tname\n\n";
+            $targets .= "$tname: $sname lib/libarithmetic.a include/arithmetic.h\n\tgcc \$(CFLAGS) $sname \$(LIBS) -L/usr/local/lib -lcunit -o $tname\n\n";
             $all .= " $tname";
             $clean .= " $tname";
         }
