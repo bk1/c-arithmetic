@@ -34,3 +34,6 @@ test/investigate
 test/investigate.c~
 test/test-arithmetic
 test/test-arithmetic.c~
+test/test-arithmetic-cunit
+test/test-arithmetic-cunit.c~
+test/test-arithmetic-ruby
