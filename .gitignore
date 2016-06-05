@@ -39,3 +39,5 @@ test/test-arithmetic.c~
 test/test-arithmetic-cunit
 test/test-arithmetic-cunit.c~
 test/test-arithmetic-ruby
+include/sqrt.h
+test/test-sqrt-cunit
