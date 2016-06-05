@@ -1,7 +1,7 @@
 /* (C) IT Sky Consulting GmbH 2015
  * http://www.it-sky-consulting.com/
  * Author: Karl Brodowsky
- * Date: 2015-03-11
+ * Date: 2016-06-05
  * License: GPL v2 (See https://de.wikipedia.org/wiki/GNU_General_Public_License )
  */
 
