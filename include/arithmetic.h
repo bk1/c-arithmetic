@@ -11,6 +11,8 @@
 
 #define CHECK_HIGHEST_BIT(x) ((sint64) (x) < 0)
 
+typedef unsigned int uint32;
+typedef signed   int sint32;
 typedef unsigned long long uint64;
 typedef signed   long long sint64;
 typedef __uint128_t uint128;

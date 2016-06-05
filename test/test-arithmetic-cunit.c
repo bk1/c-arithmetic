@@ -5,7 +5,7 @@
  * License: GPL v2 (See https://de.wikipedia.org/wiki/GNU_General_Public_License )
  */
 
-/* implements tests for psort */
+/* implements tests for c-arithmetic */
 
 /* enable qsort_r */
 #define _GNU_SOURCE
