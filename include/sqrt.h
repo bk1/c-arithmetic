@@ -14,7 +14,7 @@
 // main API-functions
 uint64 sqrt_newton(uint128 x);
 uint64 sqrt_bit_wise(uint128 x);
-// uint64 sqrt_word_wise(uint128 x);
+uint64 sqrt_word_wise(uint128 x);
 
 // helper functions, exposed only for testing TODO move to another header
 

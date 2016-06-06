@@ -59,9 +59,8 @@ void check_with_real_square(uint64 y) {
   uint128 x = mul(y, y);
   uint64 yn = sqrt_newton(x);
   uint64 yb = sqrt_bit_wise(x);
-  // uint64 yw = sqrt_word_wise(x);
-  // if (y != yb || y != yw || y!= yn) {
-  if (y != yb || y!= yn) {
+  uint64 yw = sqrt_word_wise(x);
+  if (y != yb || y != yw || y!= yn) {
     char bufd[1024];
     char bufx[1024];
     sprint_uint128_dec(bufd, x);
@@ -70,11 +69,15 @@ void check_with_real_square(uint64 y) {
     printf(" y=%llu (%llx)\n", y, y);
     printf("yb=%llu (%llx)\n", yb, yb);
     printf("yn=%llu (%llx)\n", yn, yn);
-    // printf("yw=%llu (%llx)\n", yw, yw);
+    printf("yw=%llu (%llx)\n", yw, yw);
   }
   CU_ASSERT_EQUAL(y, yb);
-  // CU_ASSERT_EQUAL(y, yw);
+  CU_ASSERT_EQUAL(y, yw);
   CU_ASSERT_EQUAL(y, yn);
+}
+
+void test_with_real_squares_of_4191() {
+  check_with_real_square(4191);
 }
 
 /*
@@ -113,15 +116,16 @@ void test_near_max_uint128() {
     CU_ASSERT_TRUE(x > MAX_UINT128_POW2);
     uint64 yn = sqrt_newton(x);
     uint64 yb = sqrt_bit_wise(x);
-    // uint64 yw = sqrt_word_wise(x);
+    uint64 yw = sqrt_word_wise(x);
     CU_ASSERT_EQUAL(yb, yn);
-    /* if (yb != yw) { */
-    /*   char bufd[128], bufx[128]; */
-    /*   sprint_uint128_dec(bufd, x); */
-    /*   sprint_uint128_hex(bufx, x); */
-    /*   printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw); */
-    /* } */
-    /* CU_ASSERT_EQUAL(yb, yw); */
+    if (yb != yw) {
+      char bufd[128], bufx[128];
+      sprint_uint128_dec(bufd, x);
+      sprint_uint128_hex(bufx, x);
+      printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw);
+    }
+    CU_ASSERT_EQUAL(yb, yw);
+    CU_ASSERT_TRUE(yb <= yw);
     CU_ASSERT_TRUE(mul(yb, yb) <= x);
     unsigned_result_with_carry ybp_low_result = add(yb, 1);
     uint64 ybp_low = ybp_low_result.value;
@@ -139,7 +143,7 @@ void check_sqrt_x(uint128 x, int i) {
   char bufzpx[1024];
   uint64 yn = sqrt_newton(x);
   uint64 yb = sqrt_bit_wise(x);
-  // uint64 yw = sqrt_word_wise(x);
+  uint64 yw = sqrt_word_wise(x);
   uint128 zb = mul(yb, yb);
   uint128 zbp = mul(yb+1, yb+1);
   if (zbp <= x) {
@@ -155,13 +159,14 @@ void check_sqrt_x(uint128 x, int i) {
     printf("(y+1)*(y+1)=%s (%s)\n", bufzpd, bufzpx);
   }
   CU_ASSERT_EQUAL(yn, yb);
-  /* if (yb != yw) { */
-  /*   char bufd[128], bufx[128]; */
-  /*   sprint_uint128_dec(bufd, x); */
-  /*   sprint_uint128_hex(bufx, x); */
-  /*   printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw); */
-  /* } */
-  /* CU_ASSERT_EQUAL(yb, yw); */
+  if (yb != yw) {
+    char bufd[128], bufx[128];
+    sprint_uint128_dec(bufd, x);
+    sprint_uint128_hex(bufx, x);
+    printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw);
+  }
+  CU_ASSERT_TRUE(yb <= yw);
+  CU_ASSERT_EQUAL(yb, yw);
   CU_ASSERT_TRUE(zb <= x);
   CU_ASSERT_TRUE(zbp > x);
 }
@@ -223,7 +228,7 @@ void test_performance() {
   // test sqrt_bit_wise
   uint128 x;
   uint64 y;
-  int n = 20000000;
+  int n = 10000000;
   clock_t t0, t1;
   t0 = clock();
   for (int i = 0; i < n; i++) {
@@ -235,12 +240,12 @@ void test_performance() {
   t0 = clock();
   for (int i = 0; i < n; i++) {
     x = MAX_UINT128_POW2 - i;
-    // y = sqrt_word_wise(x);
+    y = sqrt_word_wise(x);
   }
   // to make use of y
   CU_ASSERT_TRUE(y >= 0);
   t1 = clock();
-  // long sqrt_word_wise_t = (t1 - t0);
+  long sqrt_word_wise_t = (t1 - t0);
   t0 = clock();
   for (int i = 0; i < n; i++) {
     x = MAX_UINT128_POW2 - i;
@@ -250,8 +255,8 @@ void test_performance() {
   CU_ASSERT_TRUE(y >= 0);
   t1 = clock();
   long sqrt_newton_t = (t1 - t0);
-  // printf("bitwise: %ld wordwise: %ld newton: %ld\n", sqrt_bit_wise_t, sqrt_word_wise_t, sqrt_newton_t);
-  printf("bitwise: %ld newton: %ld\n", sqrt_bit_wise_t, sqrt_newton_t);
+  printf("bitwise: %ld wordwise: %ld newton: %ld\n", sqrt_bit_wise_t, sqrt_word_wise_t, sqrt_newton_t);
+  // printf("bitwise: %ld newton: %ld\n", sqrt_bit_wise_t, sqrt_newton_t);
 }
 
 // helper functions
@@ -351,86 +356,6 @@ void test_quarter_bitwise_near_powers_of_three() {
 }
 
 
-void check_sqrt_x_half_ww(uint64 x, int i) {
-  // unsigned_sqrt_wr_result rw = sqrt_half_word_wise_with_remainder(x);
-  unsigned_sqrt_wr_result rb = sqrt_half_bit_wise_with_remainder(x);
-  uint64 yb = rb.sqrt;
-  uint64 zb = rb.remainder;
-  // uint64 yw = rw.sqrt;
-  // uint64 zw = rw.remainder;
-  // if (yb != yw || zb != zw) {
-  // printf("i=%d x=%llu (%llx)\n", i, x, x);
-  //  printf("yb=%llu (%llx) zb=%llu (%llx)\n", yb, yb, zb, zb);
-  //  printf("yw=%llu (%llx) zw=%llu (%llx)\n", yw, yw, zw, zw);
-  // }
-  // CU_ASSERT_EQUAL(yb, yw);
-  // CU_ASSERT_EQUAL(zb, zw);
-}
-
-void _test_8494940224() {
-  printf("\n");
-  check_sqrt_x_half_ww(8494940224L, (int) 8494940224L);
-}
-
-/*
- */
-void _test_half_wordwise_with_small_real_squares() {
-  printf("\n");
-  for (int i = 0; i < 1000; i++) {
-    uint64 x = (uint64) i*i;
-    check_sqrt_x_half_ww(x, i);
-  }
-}
-
-/*
- */
-void _test_half_wordwise_with_large_real_squares() {
-  printf("\n");
-  uint64 i = 0;
-  while (i < MAX_UINT32) {
-    uint64 x = i*i;
-    check_sqrt_x_half_ww(x, i);
-    i = i * 3 / 2 + 1;
-  }
-}
-
-/*
- */
-void _test_half_wordwise_near_max_uint64() {
-  printf("\n");
-  for (int i = 0; i < 16384; i++) {
-    uint64 x = MAX_UINT64 - i;
-    CU_ASSERT_TRUE(x > MAX_UINT64_POW2);
-    check_sqrt_x_half_ww(x, i);
-  }
-}
-
-void check_half_wordwise_near_powers_of_f(int f) {
-  printf("\n");
-  uint64 x0 = 1;
-  while (x0 != 0 && x0 < MAX_UINT64_POW2) {
-    for (int i = 0; i < 1024; i++) {
-      uint64 x1 = x0 + i;
-      check_sqrt_x_half_ww(x1, i);
-      if (x0 >= i) {
-        uint64 x2 = x0 - i;
-        check_sqrt_x_half_ww(x2, -i);
-      }
-    }
-    x0 *= f;
-  }
-}
-
-void _test_half_wordwise_near_powers_of_two() {
-  printf("\n");
-  check_half_wordwise_near_powers_of_f(2);
-}
-
-void _test_half_wordwise_near_powers_of_three() {
-  printf("\n");
-  check_half_wordwise_near_powers_of_f(3);
-}
-
 /* The main() function for setting up and running the tests.
  * Returns a CUE_SUCCESS on successful running, another
  * CUnit error code on failure.
@@ -456,8 +381,8 @@ int main() {
       || (NULL == CU_add_test(pSuite, "test near powers of 2", test_near_powers_of_two))
       || (NULL == CU_add_test(pSuite, "test near powers of 3", test_near_powers_of_three))
       || (NULL == CU_add_test(pSuite, "test near powers of pi", test_near_powers_of_pi))
+      || (NULL == CU_add_test(pSuite, "test with 4191^2", test_with_real_squares_of_4191))
       || (NULL == CU_add_test(pSuite, "test with small real squares", test_with_small_real_squares))
-      // || (NULL == CU_add_test(pSuite, "test with 8494940224", test_8494940224))
       || (NULL == CU_add_test(pSuite, "test with large real squares", test_with_large_real_squares))
       || (NULL == CU_add_test(pSuite, "test half precision near max uin64", test_half_bitwise_near_max_uint64))
       || (NULL == CU_add_test(pSuite, "test half precision near powers of 2", test_half_bitwise_near_powers_of_two))
@@ -465,11 +390,6 @@ int main() {
       || (NULL == CU_add_test(pSuite, "test quarter precision near max uin64", test_quarter_bitwise_near_max_uint64))
       || (NULL == CU_add_test(pSuite, "test quarter precision near powers of 2", test_quarter_bitwise_near_powers_of_two))
       || (NULL == CU_add_test(pSuite, "test quarter precision near powers of 3", test_quarter_bitwise_near_powers_of_three))
-      //|| (NULL == CU_add_test(pSuite, "test half precision wordwise with small real squares", test_half_wordwise_with_small_real_squares))
-      //|| (NULL == CU_add_test(pSuite, "test half precision wordwise with large real squares", test_half_wordwise_with_large_real_squares))
-      //|| (NULL == CU_add_test(pSuite, "test half precision wordwise near max uin64", test_half_wordwise_near_max_uint64))
-      //|| (NULL == CU_add_test(pSuite, "test half precision wordwise near powers of 2", test_half_wordwise_near_powers_of_two))
-      //|| (NULL == CU_add_test(pSuite, "test half precision wordwise near powers of 3", test_half_wordwise_near_powers_of_three))
       || (NULL == CU_add_test(pSuite, "test performance", test_performance))
       ) {
     CU_cleanup_registry();
