@@ -40,3 +40,4 @@ test/test-arithmetic-cunit
 test/test-arithmetic-cunit.c~
 test/test-arithmetic-ruby
 test/test-sqrt-cunit
+test/test-sqrt-ffff
