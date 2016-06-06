@@ -11,6 +11,8 @@
 #include <arithmetic.h>
 #include <sqrt.h>
 
+// #define DEBUG_OUTPUT 1
+
 // calculate the sqrt of an integer to integer
 // this is a proof of concept. To become more useful libraries like gmp should be used.
 
@@ -43,8 +45,6 @@ void print_u(uint128 u) {
 /** we are looking for a number y such that y^2 <= x < (y+1)^2 */
 uint64 sqrt_newton(uint128 x) {
   // find y, a power of 2, such that y < 2^64 and x/y < 2^64
-  // print_u(x);
-  // printf("\n");
   // (x == (uint128) 0 || x == (uint128) 1)
   if ((x & MAX_UINT128_M1) == 0) {
     return (uint64) x;
@@ -64,20 +64,15 @@ uint64 sqrt_newton(uint128 x) {
   uint64 pprev_y = 0;
   while (1) {
     unsigned_divx_result q = divx(x, y);
-    // printf("y=%lld q=%lld r=%lld o=%d\n", y, q.quotient, q.remainder, q.overflow);
     unsigned_result_with_carry sum_low = add(y, q.quotient);
-    // printf("sum_low=%llu\n", sum_low.value);
     unsigned_result_with_carry sum_high = adc((uint64) 0, (uint64) q.overflow, sum_low.carry);
     uint64 val_low = sum_low.value;
     val_low >>= 1;
-    // printf("val_low=%llu\n", val_low);
     uint64 val_high = sum_high.value;
     if ((val_high & 0x01) == 1) {
       val_low |= MAX_UINT64_POW2;
     }
-    // printf("val_low=%llu val_high=%llu\n", val_low, val_high);
     y = val_low;
-    // printf("y=%llu\n", y);
     if (y == prev_y) {
       break;
     }
@@ -178,100 +173,6 @@ unsigned_sqrt_wr_result sqrt_quarter_bit_wise_with_remainder(uint32 x) {
   return sqrt_half_bit_wise_with_remainder_internal((uint64) x, shift, (uint64) pattern);
 }
 
-unsigned_sqrt_wr_result calc_sqrt_word_wise_internal(unsigned_sqrt_wr_result step_result, int n0, int n1, int n2, uint64 xlow) {
-  uint64 y0 = (uint64) step_result.sqrt;
-  uint64 x0 = (uint64) step_result.remainder;
-
-  // printf("y0=%llu (%llx) x0=%llu (%llx) xlow=%llu (%llx) n0=%d n1=%d n2=%d\n", y0, y0, x0, x0, xlow, xlow, n0, n1, n2);
-
-  uint64 x1 = (x0 << n2) + xlow;
-  uint64 d0 = ((uint64) y0) << n1;
-
-  // printf("x1=%llu (%llx) d0=%llu (%llx)\n", x1, x1, d0, d0);
-
-  if (d0 == 0) {
-    unsigned_sqrt_wr_result result;
-    result.failed = 1;
-    return result;
-  }
-
-  unsigned_divx_result q = divx(x1, d0);
-  int was_negative = 0;
-  int j = 10;
-  uint64 qq = q.quotient;
-
-  // printf("qq=%llu (%llx) q.r=%llu (%llx) q.o=%d\n", qq, qq, q.remainder, q.remainder, q.overflow);
-
-  sint64 r;
-
-  while (1) {
-    uint64 d = d0 + qq;
-    uint128 qd = mul(qq, d);
-    r = (sint64) ((sint64) x1 - (sint128) qd);
-
-    // printf("qq=%llu (%llx) d0=%llu (%llu) d=%llu (%llx) qd=%llu (%llx) r=%lld (%llx)\n", qq, qq, d0, d0, d, d, (uint64) qd, (uint64) qd, r, r);
-
-    if (r >= 0 && (r < d || was_negative)) {
-      break;
-    }
-    if (r < 0) {
-      was_negative = 1; // true
-      qq--;
-    } else {
-      qq++;
-    }
-    if (--j <= 0) {
-      // printf("breaking xlow=%llu (%llx) n0=%d n1=%d n2=%d y0=%llu (%llx) x0=%llu (%llx) x1=%llu (%llx) d0=%llu (%llx) qq=%llu (%llx) q0=%llu (%llx)\n", xlow, xlow, n0, n1, n2, y0, y0, x0, x0, x1, x1, d0, d0,qq, qq, q0, q0);
-      unsigned_sqrt_wr_result result;
-      result.failed = 1;
-      return result;
-      // break;
-    }
-  }
-  uint64 y = (y0 << n0) + qq;
-  unsigned_sqrt_wr_result result;
-  result.failed = (j <= 0);
-  result.sqrt = y;
-  result.remainder = (uint64) r;
-  return result;
-}
-
-unsigned_sqrt_wr_result sqrt_half_word_wise_with_remainder(uint64 x) {
-  uint32 xlow = (uint32) x;
-  uint32 xhigh = x >> 32;
-  // printf("xlow=%llu (%llx) xhigh=%llu (%llx)\n", (uint64) xlow, (uint64) xlow, (uint64) xhigh, (uint64) xhigh);
-  int n0 = 16;
-  int n1 = 17;
-  int n2 = 32;
-  if (xhigh == 0) {
-    return sqrt_quarter_bit_wise_with_remainder(xlow);
-  } else {
-    unsigned_sqrt_wr_result step_result = sqrt_quarter_bit_wise_with_remainder(xhigh);
-    unsigned_sqrt_wr_result word_result = calc_sqrt_word_wise_internal(step_result, n0, n1, n2, xlow);
-    if (word_result.failed) {
-      return sqrt_half_bit_wise_with_remainder(x);
-    } else {
-      return word_result;
-    }
-  }
-}
-
-uint64 sqrt_word_wise_ori(uint128 x) {
-  uint64 xlow = (uint64) x;
-  uint64 xhigh = x >> 64;
-  int n0 = 32;
-  int n1 = 33;
-  int n2 = 64;
-  unsigned_sqrt_wr_result result;
-  if (xhigh == 0) {
-    result = sqrt_half_word_wise_with_remainder(xlow);
-  } else {
-    unsigned_sqrt_wr_result step_result = sqrt_half_word_wise_with_remainder(xhigh);
-    result = calc_sqrt_word_wise_internal(step_result, n0, n1, n2, xlow);
-  }
-  return result.sqrt;
-}
-
 uint64 sqrt_word_wise(uint128 x) {
   // avoid edge cases, optimized for x=0 or x=1
   if ((x & MAX_UINT128_M1) == 0) {
@@ -289,56 +190,178 @@ uint64 sqrt_word_wise(uint128 x) {
     words[count++] = (uint32) xx & pattern;
     xx >>= n2;
   }
-
-
+#ifdef DEBUG_OUTPUT
+  for (int i = 0; i < count; i++) {
+    printf("%2d w=%llu (%02llx)\n", i, (uint64) words[i], (uint64) words[i]);
+  }
+#endif
   if (count == 1) {
     unsigned_sqrt_wr_result result = sqrt_quarter_bit_wise_with_remainder(words[0]);
     return result.sqrt;
   }
   uint32 x0 = (words[count-1] << n2) + words[count-2];
+#ifdef DEBUG_OUTPUT
+  printf("x0=%lu (%lx)\n", x0, x0);
+#endif
   unsigned_sqrt_wr_result step_result = sqrt_quarter_bit_wise_with_remainder(x0);
   if (count == 2) {
     return step_result.sqrt;
   }
-  uint64 xi = step_result.remainder;
+  uint128 xi = step_result.remainder;
   uint64 yi = step_result.sqrt;
+#ifdef DEBUG_OUTPUT
+  printf("before: xi=");
+  print_u(xi);
+  printf(" yi=%llu (%llx)\n", yi, yi);
+#endif
   for (uint32 i = 3; i <= count; i++) {
+#ifdef DEBUG_OUTPUT
+      printf("\nouter loop: i=%d\n", i);
+#endif
     xi = (xi << n2) + words[count - i];
-    uint64 d0 = yi << n1;
+    uint128 d0 = ((uint128) yi) << n1;
+#ifdef DEBUG_OUTPUT
+    printf("loop: xi=");
+    print_u(xi);
+    printf(" d0=");
+    print_u(d0);
+    printf("\n");
+#endif
     if (d0 == 0) {
       printf("bad d0\n");
       return sqrt_bit_wise(x);
     }
-    unsigned_divx_result qq = divx((uint128) xi, d0);
-    uint64 q = qq.quotient;
-    uint64 r = qq.remainder;
+    unsigned_divx_result qq;
+    qq.overflow = 0;
+    if (d0 > xi) {
+      qq.quotient = 0;
+      qq.remainder = xi;
+    } else if (d0 == xi) {
+      qq.quotient = 1;
+      qq.remainder = 0;
+    } else if (d0 > MAX_UINT64) {
+      // this case happens, it needs to be addressed in a better way...
+#ifdef DEBUG_OUTPUT     
+      printf(" d0 too big (1): ");
+      printf("d0=");
+      print_u(d0);
+      printf(" d0\'=%llu (%llx)\n", (uint64) d0, (uint64) d0);
+#endif
+      return sqrt_bit_wise(x);
+    } else if (d0 != (uint64) d0) {
+#ifdef DEBUG_OUTPUT     
+      printf(" d0 too big (2): ");
+      printf("d0=");
+      print_u(d0);
+      printf(" d0\'=%llu (%llx)\n", (uint64) d0, (uint64) d0);
+#endif
+      return sqrt_bit_wise(x);
+    } else {
+      qq = divx((uint128) xi, (uint64) d0);
+    }
     if (qq.overflow) {
-      printf("overflow: i=%d\n", i);
+      printf("overflow: i=%d xi=", i);
+      print_u(xi);
+      printf(" d0=%llu (%llx) qq=%llu (%llx)\n", (uint64)d0, (uint64) d0, qq.quotient, qq.quotient);
       return sqrt_bit_wise(x);
     }
-    int j = 10;
+    uint64 q = qq.quotient;
+    uint64 rem = qq.remainder;
+    uint64 d0_r = (uint64) d0;
+    if (d0 != d0_r) {
+#ifdef DEBUG_OUTPUT     
+      printf(" d0 too big (3): ");
+      printf("d0=");
+      print_u(d0);
+      printf(" d0_r=%llu (%llx)\n", d0_r, d0_r);
+#endif
+      return sqrt_bit_wise(x);
+    }
+#ifdef DEBUG_OUTPUT
+    printf("loop: xi=");
+    print_u(xi);
+    printf(" d0=");
+    print_u(d0);
+    printf(" d0_r=%llu (%llx)", d0_r, d0_r);
+    printf(" q=%llu (%llx) rem=%llu (%llx)\n", q, q, rem, rem);
+#endif
+    int j = 20;
     int was_negative = 0;
+    int was_positive = 0;
+    sint128 r = 0;
+    sint128 prev_r;
+    uint64  prev_q;
     while (1) {
-      uint64 d = d0 + q;
+#ifdef DEBUG_OUTPUT
+      printf("inner loop: j=%d d0=%llu (%llx) d0=", j, d0_r, d0_r);
+      print_u(d0);
+      printf("\n");
+#endif
+      unsigned_result_with_carry urwc_d = add(d0_r, (uint64) q);
+      if (urwc_d.carry) {
+        printf("overflow calculating d\n");
+        return sqrt_bit_wise(x);
+      }
+      uint64 d = urwc_d.value;
       uint128 qd = mul(q, d);
-      sint128 r = (sint128) xi - (sint128) qd;
-      if (r >= 0 && (r < d || was_negative)) {
+      r = (sint128) xi - (sint128) qd;
+#ifdef DEBUG_OUTPUT
+      printf("iloop: j=%d xi=", j);
+      print_u(xi);
+      printf(" q=%llu (%llx) rem=%llu (%llx) d=%llu (%llx) r=", q, q, rem, rem, d, d);
+      print_u(r);
+      printf(" sgn=%d\n", r < 0? -1 : 1);
+#endif
+      if (r == 0 || r >= 0 && (r < d || was_negative)) {
         break;
       }
       if (r < 0) {
+        if (was_positive) {
+          r = prev_r;
+          q = prev_q;
+          break;
+        }
         was_negative = 1;
+        was_positive = 0;
         q--;
       } else {
+        was_negative = 0;
+        was_positive = 1;
+        prev_r = r;
+        prev_q = q;
         q++;
       }
+#ifdef DEBUG_OUTPUT
+      if (j <= 15) {
+        printf("pre-breaking i=%d j=%d q=%llu (%llx) xi=", i, j, q, q);
+        print_u(xi);
+        printf(" d=%llu (%llx) r=", d, d);
+        print_u(r);
+        printf(" sgn=%d\n", r < 0? -1 : 1);
+      }
+#endif
       if (--j <= 0) {
-        printf("breaking i=%d j=%d\n", i, j);
+        printf("breaking i=%d j=%d q=%llu (%llx) xi=", i, j, q, q);
+        print_u(xi);
+        printf(" d=%llu (%llx) r=", d, d);
+        print_u(r);
+        printf(" sgn=%d\n", r < 0? -1 : 1);
         return sqrt_bit_wise(x);
       }
     }
-    xi = r;
+    xi = (uint128) r;
     yi = (yi << n0) + q;
+#ifdef DEBUG_OUTPUT
+    printf("loop end: xi=");
+    print_u(xi);
+    printf(" yi=%llu (%llx) q=%llu (%llx)\n", yi, yi, q, q);
+#endif
   }
+#ifdef DEBUG_OUTPUT
+  printf("result: xi=");
+  print_u(xi);
+  printf(" yi=%llu (%llx)\n", yi, yi);
+#endif
   return yi;
 }
 
