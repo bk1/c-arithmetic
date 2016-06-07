@@ -36,9 +36,16 @@ void print_u(uint128 u) {
   char bufd[100];
   char bufx[100];
   sprint_uint128_dec(bufd, u);
-  sprint_uint128_hex(bufx, u);
-  printf("%s (0x%s)", bufd, bufx);
+  sprint_uint128_hex(bufx, u, 1);
+  printf("%s (%s)", bufd, bufx);
+}
 
+void print_s(sint128 u) {
+  char bufd[100];
+  char bufx[100];
+  sprint_sint128_dec(bufd, u);
+  sprint_sint128_hex(bufx, u, 1);
+  printf("%s (%s)", bufd, bufx);
 }
 
 
@@ -289,7 +296,7 @@ uint64 sqrt_word_wise(uint128 x) {
     int was_negative = 0;
     int was_positive = 0;
     sint128 r = 0;
-    sint128 prev_r;
+    sint128 prev_r = -MAX_UINT64;
     uint64  prev_q;
     while (1) {
 #ifdef DEBUG_OUTPUT
@@ -309,7 +316,7 @@ uint64 sqrt_word_wise(uint128 x) {
       printf("iloop: j=%d xi=", j);
       print_u(xi);
       printf(" q=%llu (%llx) rem=%llu (%llx) d=%llu (%llx) r=", q, q, rem, rem, d, d);
-      print_u(r);
+      print_s(r);
       printf(" sgn=%d\n", r < 0? -1 : 1);
 #endif
       if (r == 0 || r >= 0 && (r < d || was_negative)) {
@@ -336,7 +343,7 @@ uint64 sqrt_word_wise(uint128 x) {
         printf("pre-breaking i=%d j=%d q=%llu (%llx) xi=", i, j, q, q);
         print_u(xi);
         printf(" d=%llu (%llx) r=", d, d);
-        print_u(r);
+        print_s(r);
         printf(" sgn=%d\n", r < 0? -1 : 1);
       }
 #endif
@@ -344,7 +351,7 @@ uint64 sqrt_word_wise(uint128 x) {
         printf("breaking i=%d j=%d q=%llu (%llx) xi=", i, j, q, q);
         print_u(xi);
         printf(" d=%llu (%llx) r=", d, d);
-        print_u(r);
+        print_s(r);
         printf(" sgn=%d\n", r < 0? -1 : 1);
         return sqrt_bit_wise(x);
       }

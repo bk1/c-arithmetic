@@ -108,9 +108,13 @@ void sprint_uint128_dec(char *buf,  uint128 x) {
   }
 }
 
-void sprint_uint128_hex(char *buf,  uint128 x) {
+void sprint_uint128_hex(char *buf,  uint128 x, int with0x) {
   uint64 xl = lower(x);
   uint64 xh = upper(x);
+  if (with0x) {
+    sprintf(buf, "0x");
+    buf+=2;
+  }
   if (xh != 0) {
     sprintf(buf, "%llx%016llx", xh, xl);
   } else {
@@ -118,16 +122,47 @@ void sprint_uint128_hex(char *buf,  uint128 x) {
   }
 }
 
-void sprint_uint128_oct(char *buf,  uint128 x) {
+void sprint_uint128_oct(char *buf,  uint128 x, int with0) {
   uint64  xl = (uint64) (x % EIGHT_21);
   uint128 xx = x / EIGHT_21;
   uint64  xm = (uint64) (xx % EIGHT_21);
   uint64  xh = (uint64) (xx / EIGHT_21);
+  if (with0) {
+    sprintf(buf, "0");
+    buf++;
+  }
   if (xh != 0) {
     sprintf(buf, "%llo%021llo%021llo", xh, xm, xl);
   } else if (xm != 0) {
     sprintf(buf, "%llo%021llo", xm, xl);
   } else {
     sprintf(buf, "%llo", xl);
+  }
+}
+
+void sprint_sint128_dec(char *buf,  sint128 x) {
+  if (x < 0) {
+    sprintf(buf, "-");
+    sprint_uint128_dec(buf + 1, (uint128) -x);
+  } else {
+    sprint_uint128_dec(buf, (uint128) x);
+  }
+}
+
+void sprint_sint128_hex(char *buf,  sint128 x, int with0x) {
+  if (x < 0) {
+    sprintf(buf, "-");
+    sprint_uint128_hex(buf + 1, (uint128) -x, with0x);
+  } else {
+    sprint_uint128_hex(buf, (uint128) x, with0x);
+  }
+}
+
+void sprint_sint128_oct(char *buf,  sint128 x, int with0) {
+  if (x < 0) {
+    sprintf(buf, "-");
+    sprint_uint128_oct(buf + 1, (uint128) -x, with0);
+  } else {
+    sprint_uint128_oct(buf, (uint128) x, with0);
   }
 }

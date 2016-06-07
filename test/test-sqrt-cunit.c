@@ -64,7 +64,7 @@ void check_with_real_square(uint64 y) {
     char bufd[1024];
     char bufx[1024];
     sprint_uint128_dec(bufd, x);
-    sprint_uint128_hex(bufx, x);
+    sprint_uint128_hex(bufx, x, 1);
     printf("          x=%s (%s)\n", bufd, bufx);
     printf(" y=%llu (%llx)\n", y, y);
     printf("yb=%llu (%llx)\n", yb, yb);
@@ -121,7 +121,7 @@ void test_near_max_uint128() {
     if (yb != yw) {
       char bufd[128], bufx[128];
       sprint_uint128_dec(bufd, x);
-      sprint_uint128_hex(bufx, x);
+      sprint_uint128_hex(bufx, x, 1);
       printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw);
     }
     CU_ASSERT_EQUAL(yb, yw);
@@ -148,22 +148,22 @@ void check_sqrt_x(uint128 x, int i) {
   uint128 zbp = mul(yb+1, yb+1);
   if (zbp <= x) {
     sprint_uint128_dec(bufxd, x);
-    sprint_uint128_hex(bufxx, x);
+    sprint_uint128_hex(bufxx, x, 1);
     sprint_uint128_dec(bufzd, zb);
-    sprint_uint128_hex(bufzx, zb);
+    sprint_uint128_hex(bufzx, zb, 1);
     sprint_uint128_dec(bufzpd, zbp);
-    sprint_uint128_hex(bufzpx, zbp);
+    sprint_uint128_hex(bufzpx, zbp, 1);
     printf("i=%7d\n", i);
-    printf("          x=%s (%s) yb=%llu (%llx) yn=%llu (%llx)\n", bufxd, bufxx, yb, yb, yn, yn);
-    printf("        y*y=%s (%s)\n", bufzd, bufzx);
-    printf("(y+1)*(y+1)=%s (%s)\n", bufzpd, bufzpx);
+    printf("          x=%s (%s) yb=%llu (0x%llx) yn=%llu (0x%llx)\n", bufxd, bufxx, yb, yb, yn, yn);
+    printf("        y*y=%s (0x%s)\n", bufzd, bufzx);
+    printf("(y+1)*(y+1)=%s (0x%s)\n", bufzpd, bufzpx);
   }
   CU_ASSERT_EQUAL(yn, yb);
   if (yb != yw) {
     char bufd[128], bufx[128];
     sprint_uint128_dec(bufd, x);
-    sprint_uint128_hex(bufx, x);
-    printf("x=%s (%s) yb=%llu (%llx) yw=%llu (%llx)\n", bufd, bufx, yb, yb, yw, yw);
+    sprint_uint128_hex(bufx, x, 1);
+    printf("x=%s (%s) yb=%llu (0x%llx) yw=%llu (0x%llx)\n", bufd, bufx, yb, yb, yw, yw);
   }
   CU_ASSERT_TRUE(yb <= yw);
   CU_ASSERT_EQUAL(yb, yw);

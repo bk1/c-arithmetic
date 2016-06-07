@@ -58,11 +58,11 @@ void test_ffff() {
   char bufd[1024];
   char bufx[1024];
   sprint_uint128_dec(bufd, x);
-  sprint_uint128_hex(bufx, x);
+  sprint_uint128_hex(bufx, x, 1);
   printf("  0x40000000000000000000000000000001\n");
   printf("          x=%s (%s)\n", bufd, bufx);
-  printf("yb=%llu (%llx)\n", yb, yb);
-  printf("yw=%llu (%llx)\n", yw, yw);
+  printf("yb=%llu (0x%llx)\n", yb, yb);
+  printf("yw=%llu (0x%llx)\n", yw, yw);
 
   CU_ASSERT_EQUAL(yb, yw);
 }

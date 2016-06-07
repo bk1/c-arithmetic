@@ -54,7 +54,10 @@ uint64 upper(uint128 x);
 uint128 combine(uint64 upper, uint64 lower);
 
 void sprint_uint128_dec(char *buf,  uint128 x);
-void sprint_uint128_hex(char *buf,  uint128 x);
-void sprint_uint128_oct(char *buf,  uint128 x);
+void sprint_uint128_hex(char *buf,  uint128 x, int with0x);
+void sprint_uint128_oct(char *buf,  uint128 x, int with0);
+void sprint_sint128_dec(char *buf,  sint128 x);
+void sprint_sint128_hex(char *buf,  sint128 x, int with0x);
+void sprint_sint128_oct(char *buf,  sint128 x, int with0);
 
 #endif

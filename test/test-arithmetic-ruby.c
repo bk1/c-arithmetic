@@ -69,8 +69,8 @@ void mul_test() {
         for (uint64 yl = 0; yl <= 5; yl++) {
           uint64 y = yh + yl - 1;
           uint128 z = mul(x, y);
-          sprint_uint128_hex(bufx, z);
-          printf("x=%llu; y=%llu; z=0x%s;\nmtest(x,y,z);\n", x, y, bufx);
+          sprint_uint128_hex(bufx, z, 1);
+          printf("x=%llu; y=%llu; z=%s;\nmtest(x,y,z);\n", x, y, bufx);
         }
       }
     }
@@ -97,9 +97,9 @@ void divx_test() {
           unsigned_divx_result z2 = divx(x2, y);
           uint128 q = combine(z1.quotient, z2.quotient);
           uint64  r = z2.remainder;
-          sprint_uint128_hex(bufx, x);
-          sprint_uint128_hex(bufq, q);
-          printf("x=0x%s; y=%llu; q=0x%s; r=%llu; o1=%d; o2=%d;\ndtest(x,y,q,r,o1,o2);\n", bufx, y, bufq, r, z1.overflow, z2.overflow);
+          sprint_uint128_hex(bufx, x, 1);
+          sprint_uint128_hex(bufq, q, 1);
+          printf("x=%s; y=%llu; q=%s; r=%llu; o1=%d; o2=%d;\ndtest(x,y,q,r,o1,o2);\n", bufx, y, bufq, r, z1.overflow, z2.overflow);
           fflush(stdout);
         }
       }
@@ -116,9 +116,9 @@ void sprintf_test() {
     for (uint128 xl = 0; xl <= 5; xl++) {
       uint128 x = xh + xl - 1;
       sprint_uint128_dec(bufd, x);
-      sprint_uint128_hex(bufx, x);
-      sprint_uint128_oct(bufo, x);
-      printf("x=%s; xs='%s'; y=0x%s; ys='%s'; z=0%s; zs='%s';\nptest(x,y,z, xs, ys, zs);\n", bufd, bufd, bufx, bufx, bufo, bufo);
+      sprint_uint128_hex(bufx, x, 1);
+      sprint_uint128_oct(bufo, x, 1);
+      printf("x=%s; xs='%s'; y=%s; ys='%s'; z=%s; zs='%s';\nptest(x,y,z, xs, ys, zs);\n", bufd, bufd, bufx, bufx, bufo, bufo);
     }
   }
 }
