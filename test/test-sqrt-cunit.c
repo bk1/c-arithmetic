@@ -24,14 +24,14 @@
 
 #include <sqrt.h>
 
-static const uint128 MAX_UINT128 = (uint128) -1;
-static const uint128 MAX_UINT128_POW2 = ((uint128) 1) << 127;
+// static const uint128 MAX_UINT128 = (uint128) -1;
+// static const uint128 MAX_UINT128_POW2 = ((uint128) 1) << 127;
 
-static const uint64 MAX_UINT64 = (uint64) -1;
-static const uint64 MAX_UINT64_POW2 = ((uint64) 1) << 63;
+// static const uint64 MAX_UINT64 = (uint64) -1;
+// static const uint64 MAX_UINT64_POW2 = ((uint64) 1) << 63;
 
-static const uint32 MAX_UINT32 = (uint32) -1;
-static const uint32 MAX_UINT32_POW2 = ((uint32) 1) << 31;
+// static const uint32 MAX_UINT32 = (uint32) -1;
+// static const uint32 MAX_UINT32_POW2 = ((uint32) 1) << 31;
 
 /* The suite initialization function.
  * Opens the temporary file used by the tests.

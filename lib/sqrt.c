@@ -16,21 +16,6 @@
 // calculate the sqrt of an integer to integer
 // this is a proof of concept. To become more useful libraries like gmp should be used.
 
-static const uint32 MAX_UINT32             = (uint32) -1; // 0xffffffffffffffff;
-static const uint32 MAX_UINT32_M1          = (uint32) -2; // 0xffffffffffffffff;
-static const uint32 MAX_UINT32_POW2        = ((uint32) 1) << 31; // 0x8000000000000000;
-static const uint32 MAX_UINT32_2BIT_GROUP  = ((uint32) 3) << 30;
-
-static const uint64 MAX_UINT64             = (uint64) -1; // 0xffffffffffffffff;
-static const uint64 MAX_UINT64_M1          = (uint64) -2; // 0xffffffffffffffff;
-static const uint64 MAX_UINT64_POW2        = ((uint64) 1) << 63; // 0x8000000000000000;
-static const uint64 MAX_UINT64_2BIT_GROUP  = ((uint64) 3) << 62;
-
-static const uint128 MAX_UINT128            = (uint128) -1; // 0xffffffffffffffffffffffffffffffff;
-static const uint128 MAX_UINT128_M1         = (uint128) -2; // 0xfffffffffffffffffffffffffffffffe;
-static const uint128 MAX_UINT128_POW2       = ((uint128) 1) << 127; // 0x80000000000000000000000000000000;
-static const uint128 MAX_UINT128_2BIT_GROUP = ((uint128) 3) << 126; // 0xc0000000000000000000000000000000;
-
 
 void print_u(uint128 u) {
   char bufd[100];

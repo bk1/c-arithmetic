@@ -39,15 +39,15 @@ unsigned_result_with_carry adc_sy(uint64 x, unsigned_result_with_carry ry) {
   return adc(x, ry.value, ry.carry);
 }
 
-unsigned_result_with_carry sbb(uint64 x, uint64 y, uint8 carry) {
+unsigned_result_with_carry sbb(uint64 x, uint64 y, uint8 borrow) {
   unsigned_result_with_carry result;
-  uint64 z = x - y - carry;
+  uint64 z = x - y - borrow;
   int xh = CHECK_HIGHEST_BIT(x);
   int yh = CHECK_HIGHEST_BIT(y);
   int zh = CHECK_HIGHEST_BIT(z);
-  int cc = xh ? (yh & zh) : (yh | zh);
+  int new_borrow = xh ? (yh & zh) : (yh | zh);
   result.value = z;
-  result.carry = (uint8) cc;
+  result.carry = (uint8) new_borrow;
   return result;
 }
 
@@ -72,6 +72,11 @@ uint128 mul(uint64 x, uint64 y) {
   return result;
 }
 
+sint128 muls(sint64 x, sint64 y) {
+  sint128 result = (sint128) x * (sint128) y;
+  return result;
+}
+
 unsigned_divx_result divx(uint128 x, uint64 y) {
   // printf("x=%lld y=%lld\n", (uint64) x, y);
   // fflush(stdout);
@@ -91,6 +96,16 @@ unsigned_divx_result divx(uint128 x, uint64 y) {
   result.quotient = ql;
   result.remainder = r;
   result.overflow = (qu != 0);
+  return result;
+}
+
+unsigned_divx_x_result divx_x(uint128 x, uint128 y) {
+  uint128 q = x/y;
+  uint128 r = x%y;
+  unsigned_divx_x_result result;
+  result.quotient  = q;
+  result.remainder = r;
+  result.overflow = y == 0;
   return result;
 }
 
