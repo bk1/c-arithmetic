@@ -5,6 +5,11 @@
  * License: GPL v2 (See https://de.wikipedia.org/wiki/GNU_General_Public_License )
  */
 
+/*
+ *  Tests create valid ruby code and pipe it immediately to ruby
+ *  to verify the correctness of the calculations within ruby, which has a unlimited length integer arithmetic.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -38,3 +38,9 @@ test/test-sqrt-ffff: test/test-sqrt-ffff.c lib/libarithmetic.a include/arithmeti
 
 lib/libarithmetic.a: lib/sqrt.o lib/arithmetic.o lib/cbrt.o
 	ar crs lib/libarithmetic.a lib/sqrt.o lib/arithmetic.o lib/cbrt.o
+
+test: all
+	test/test-arithmetic-cunit
+	test/test-sqrt-cunit
+	test/test-arithmetic-ruby
+	test/test-sqrt-ffff

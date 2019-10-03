@@ -54,6 +54,7 @@ void test_ffff() {
   uint128  x = (((uint128) 1) << 126) + 1;
   uint64  yb = sqrt_bit_wise(x);
   uint64  yw = sqrt_word_wise(x);
+  uint64  y_expected = ((uint64) 1) << 63;
 
   char bufd[1024];
   char bufx[1024];
@@ -64,7 +65,8 @@ void test_ffff() {
   printf("yb=%llu (0x%llx)\n", yb, yb);
   printf("yw=%llu (0x%llx)\n", yw, yw);
 
-  CU_ASSERT_EQUAL(yb, yw);
+  CU_ASSERT_EQUAL(y_expected, yb);
+  CU_ASSERT_EQUAL(y_expected, yw);
 }
 
 /* The main() function for setting up and running the tests.
